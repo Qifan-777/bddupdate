@@ -65,6 +65,16 @@ jobs:
           cd build
           cmake --build . --target install/strip
 
+      - name: Bundle MinGW dependencies
+        run: |
+          echo "=== Copying runtime DLLs into install/bin ==="
+          ldd ./install/bin/scram.exe | grep '/mingw64/bin/' | awk '{print $3}' | while read dll; do
+            echo "Copying $dll"
+            cp "$dll" ./install/bin/
+          done
+          echo "=== Final bundle contents ==="
+          ls -la ./install/bin/
+
       - name: Run basic CLI test
         run: |
           ./install/bin/scram --version
