@@ -307,8 +307,15 @@ void ProbabilityAnalyzer<Bdd>::CollectNodeProbabilities(
     return;
   ite.mark(mark);
   if (!ite.module()) {
-    const mef::BasicEvent* event = graph()->basic_events()[ite.index()];
-    bdd_node_probabilities_.push_back({event->id(), ite.p()});
+    const auto& events = graph()->basic_events();
+    int idx = ite.index();
+    int base = 2;  // Pdag::kVariableStartIndex
+    if (idx >= base && idx < base + static_cast<int>(events.size())) {
+      const mef::BasicEvent* event = events[idx];
+      if (event) {
+        bdd_node_probabilities_.push_back({event->id(), ite.p()});
+      }
+    }
   }
   if (ite.module()) {
     const Bdd::Function& res = bdd_graph_->modules().find(ite.index())->second;
