@@ -1,0 +1,71 @@
+name: Build SCRAM for Windows
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+  workflow_dispatch:  # Allow manual trigger from GitHub web UI
+
+jobs:
+  build-windows-msys2:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-make
+            mingw-w64-x86_64-boost
+            mingw-w64-x86_64-libxml2
+            mingw-w64-x86_64-qt5
+
+      - name: Configure CMake
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "MSYS Makefiles" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=../install \
+            -DBUILD_TESTING=ON \
+            -DWITH_JEMALLOC=OFF
+
+      - name: Build SCRAM
+        run: |
+          cd build
+          cmake --build . --parallel $(nproc)
+
+      - name: Install / Strip
+        run: |
+          cd build
+          cmake --build . --target install/strip
+
+      - name: Run basic CLI test
+        run: |
+          ./install/bin/scram --version
+          ./install/bin/scram --bdd --probability -o test_output.xml input/TwoTrain/two_train.xml
+          grep "bdd-nodes" test_output.xml || (echo "ERROR: bdd-nodes not found in output!" && exit 1)
+
+      - name: Upload executable artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: scram-windows-msys2
+          path: install/bin/scram.exe
+
+      - name: Upload full install artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: scram-windows-full
+          path: install/
