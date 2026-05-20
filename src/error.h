@@ -35,6 +35,11 @@
 
 #include "ext/source_info.h"
 
+// Compatibility with newer Boost versions.
+#ifndef BOOST_THROW_EXCEPTION_CURRENT_FUNCTION
+#define BOOST_THROW_EXCEPTION_CURRENT_FUNCTION BOOST_EXCEPTION_PRETTY_FUNCTION
+#endif
+
 /// Convenience macro to throw SCRAM exceptions.
 /// This is similar to BOOST_THROW_EXCEPTION;
 /// however, it doesn't obfuscate

@@ -153,7 +153,7 @@ inline std::string_view trim(const std::string_view& text) noexcept {
 ///
 /// @returns The exception object to be thrown.
 template <typename T>
-T GetError(xmlErrorPtr xml_error = nullptr) {
+T GetError(const xmlError* xml_error = nullptr) {
   if (!xml_error)
     xml_error = xmlGetLastError();
   assert(xml_error && "No XML error is available.");

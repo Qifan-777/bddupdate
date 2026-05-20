@@ -28,7 +28,7 @@ Document::Document(const std::string& file_path, Validator* validator)
     : doc_(nullptr, &xmlFreeDoc) {
   xmlResetLastError();
   doc_.reset(xmlReadFile(file_path.c_str(), nullptr, kParserOptions));
-  xmlErrorPtr xml_error = xmlGetLastError();
+  const xmlError* xml_error = xmlGetLastError();
   if (xml_error) {
     if (xml_error->domain == xmlErrorDomain::XML_FROM_IO) {
       SCRAM_THROW(IOError(xml_error->message))
