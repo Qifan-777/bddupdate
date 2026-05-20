@@ -13,6 +13,9 @@ jobs:
     defaults:
       run:
         shell: msys2 {0}
+    env:
+      CC: gcc
+      CXX: g++
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -25,12 +28,21 @@ jobs:
           msystem: MINGW64
           update: true
           install: >-
-            mingw-w64-x86_64-gcc
+            make
+            mingw-w64-x86_64-toolchain
             mingw-w64-x86_64-cmake
-            mingw-w64-x86_64-make
             mingw-w64-x86_64-boost
             mingw-w64-x86_64-libxml2
             mingw-w64-x86_64-qt5
+
+      - name: Verify tools
+        run: |
+          echo "=== Tool versions ==="
+          which make && make --version | head -1
+          which gcc && gcc --version | head -1
+          which g++ && g++ --version | head -1
+          which cmake && cmake --version | head -1
+          which ar && ar --version | head -1
 
       - name: Configure CMake
         run: |
@@ -39,8 +51,9 @@ jobs:
           cmake .. -G "MSYS Makefiles" \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_PREFIX=../install \
-            -DBUILD_TESTING=ON \
-            -DWITH_JEMALLOC=OFF
+            -DBUILD_TESTING=OFF \
+            -DWITH_JEMALLOC=OFF \
+            -DBUILD_GUI=OFF
 
       - name: Build SCRAM
         run: |
