@@ -234,18 +234,28 @@ double ProbabilityAnalyzer<Bdd>::CalculateTotalProbability(
     const Pdag::IndexMap<double>& p_vars) noexcept {
   CLOCK(calc_time);  // BDD based calculation time.
   LOG(DEBUG4) << "Calculating probability with BDD...";
+
+  // Calculate probabilities for all original gates first.
+  gate_probabilities_.clear();
+  for (const auto& entry : bdd_graph_->modules()) {
+    int gate_index = entry.first;
+    const Bdd::Function& func = entry.second;
+    current_mark_ = !current_mark_;
+    double gate_prob =
+        CalculateProbability(func.vertex, current_mark_, p_vars);
+    if (func.complement)
+      gate_prob = 1 - gate_prob;
+    const mef::Gate* mef_gate = graph()->GetMefGate(gate_index);
+    if (mef_gate) {
+      gate_probabilities_.push_back({mef_gate->id(), gate_prob});
+    }
+  }
+
   current_mark_ = !current_mark_;
   double prob =
       CalculateProbability(bdd_graph_->root().vertex, current_mark_, p_vars);
   if (bdd_graph_->root().complement)
     prob = 1 - prob;
-
-  // Collect BDD node probabilities after calculation.
-  bdd_node_probabilities_.clear();
-  bool collect_mark = !current_mark_;
-  bdd_graph_->ClearMarks(collect_mark);
-  CollectNodeProbabilities(bdd_graph_->root().vertex, current_mark_);
-  bdd_graph_->ClearMarks(collect_mark);
 
   LOG(DEBUG4) << "Calculated probability " << prob << " in " << DUR(calc_time);
   return prob;

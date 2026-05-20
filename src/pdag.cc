@@ -568,6 +568,7 @@ void Pdag::AddArg(const GatePtr& parent, const T& event, bool complement,
     if (!pdag_gate) {
       pdag_gate = ConstructGate(event.formula(), ccf, nodes);
     }
+    gate_index_to_mef_[pdag_gate->index()] = &event;
     parent->AddArg(pdag_gate, complement);
 
   } else {

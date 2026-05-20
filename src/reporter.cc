@@ -421,12 +421,12 @@ void Reporter::ReportResults(const core::RiskAnalysis::Result::Id& id,
     report_sil_fractions(prob_analysis.sil().pfh_fractions);
   }
 
-  if (const auto* node_probs = prob_analysis.bdd_node_probabilities()) {
-    if (!node_probs->empty()) {
-      xml::StreamElement bdd_nodes = results->AddChild("bdd-nodes");
-      scram::PutId(id, &bdd_nodes);
-      for (const auto& entry : *node_probs) {
-        bdd_nodes.AddChild("node")
+  if (const auto* gate_probs = prob_analysis.gate_probabilities()) {
+    if (!gate_probs->empty()) {
+      xml::StreamElement gate_probs_elem = results->AddChild("gate-probabilities");
+      scram::PutId(id, &gate_probs_elem);
+      for (const auto& entry : *gate_probs) {
+        gate_probs_elem.AddChild("gate")
             .SetAttribute("name", entry.first)
             .SetAttribute("probability", entry.second);
       }

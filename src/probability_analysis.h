@@ -104,6 +104,13 @@ class ProbabilityAnalysis : public Analysis {
     return nullptr;
   }
 
+  /// @returns Gate probabilities if BDD is used for probability analysis.
+  ///          Each pair contains the gate name and its probability.
+  virtual const std::vector<std::pair<std::string, double>>* gate_probabilities()
+      const {
+    return nullptr;
+  }
+
  protected:
   /// @returns The mission time expression of the model.
   mef::MissionTime& mission_time() { return *mission_time_; }
@@ -314,6 +321,11 @@ class ProbabilityAnalyzer<Bdd> : public ProbabilityAnalyzerBase {
     return &bdd_node_probabilities_;
   }
 
+  const std::vector<std::pair<std::string, double>>* gate_probabilities()
+      const override {
+    return &gate_probabilities_;
+  }
+
  private:
   /// Creates a new BDD for use by the analyzer.
   ///
@@ -348,6 +360,7 @@ class ProbabilityAnalyzer<Bdd> : public ProbabilityAnalyzerBase {
   bool current_mark_;  ///< To keep track of BDD current mark.
   bool owner_;  ///< Indication that pointers are handles.
   std::vector<std::pair<std::string, double>> bdd_node_probabilities_;  ///< BDD node probs.
+  std::vector<std::pair<std::string, double>> gate_probabilities_;  ///< Gate probs.
 };
 
 }  // namespace scram::core

@@ -224,7 +224,7 @@
           <ref name="safety-integrity-levels"/>
           <ref name="statistical-measure"/>
           <ref name="curve"/>
-          <ref name="bdd-nodes"/>
+          <ref name="gate-probabilities"/>
           <ref name="initiating-event"/>
         </choice>
       </oneOrMore>
@@ -491,14 +491,14 @@
   </define>
 
   <!-- ============================================================= -->
-  <!-- II.6. BDD Nodes -->
+  <!-- II.6. Gate Probabilities -->
   <!-- ============================================================= -->
 
-  <define name="bdd-nodes">
-    <element name="bdd-nodes">
+  <define name="gate-probabilities">
+    <element name="gate-probabilities">
       <ref name="analysis-id"/>
       <zeroOrMore>
-        <element name="node">
+        <element name="gate">
           <attribute name="name"> <data type="NCName"/> </attribute>
           <attribute name="probability"> <ref name="probability-data"/> </attribute>
         </element>

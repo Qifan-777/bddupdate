@@ -177,8 +177,7 @@ Bdd::Function Bdd::ConvertGraph(
   }
   ClearTables();
   assert(result.vertex);
-  if (gate.module())
-    modules_.emplace(gate.index(), result);
+  modules_.emplace(gate.index(), result);
   if (gate.parents().size() > 1)
     gates->insert({gate.index(), {result, 1}});
   return result;

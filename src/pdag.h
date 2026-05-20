@@ -907,6 +907,13 @@ class Pdag : private boost::noncopyable {
   bool& complement() { return complement_; }  // Allows XOR setting.
   /// @}
 
+  /// @returns The original MEF gate for a given PDAG gate index.
+  ///          nullptr if the index does not correspond to a gate.
+  const mef::Gate* GetMefGate(int index) const {
+    auto it = gate_index_to_mef_.find(index);
+    return it != gate_index_to_mef_.end() ? it->second : nullptr;
+  }
+
   /// @returns The single Boolean constant for the whole graph.
   ///
   /// @todo Consider limiting access to transform functions and gates.
@@ -1137,6 +1144,7 @@ class Pdag : private boost::noncopyable {
   /// NULL type gates are created by gates with only one argument.
   std::vector<GateWeakPtr> null_gates_;
   std::vector<Substitution> substitutions_;  ///< Non-declarative substitutions.
+  std::unordered_map<int, const mef::Gate*> gate_index_to_mef_;  ///< Gate index mapping.
 };
 
 /// Traverses and visits gates and nodes in the graph.
