@@ -79,7 +79,7 @@ jobs:
         run: |
           ./install/bin/scram --version
           ./install/bin/scram --bdd --probability -o test_output.xml input/TwoTrain/two_train.xml
-          grep "bdd-nodes" test_output.xml || (echo "ERROR: bdd-nodes not found in output!" && exit 1)
+          grep "gate-probabilities" test_output.xml || (echo "ERROR: gate-probabilities not found in output!" && exit 1)
 
       - name: Upload executable artifact
         uses: actions/upload-artifact@v4
