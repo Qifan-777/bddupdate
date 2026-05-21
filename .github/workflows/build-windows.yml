@@ -78,7 +78,7 @@ jobs:
       - name: Run basic CLI test
         run: |
           ./install/bin/scram --version
-          ./install/bin/scram --bdd --probability -o test_output.xml input/TwoTrain/two_train.xml
+          ./install/bin/scram --bdd --probability --gate-probabilities -o test_output.xml input/TwoTrain/two_train.xml
           grep "gate-probabilities" test_output.xml || (echo "ERROR: gate-probabilities not found in output!" && exit 1)
 
       - name: Upload executable artifact
