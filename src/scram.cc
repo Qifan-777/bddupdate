@@ -74,6 +74,7 @@ po::options_description ConstructOptions() {
       ("importance", "Perform importance analysis")
       ("uncertainty", "Perform uncertainty analysis")
       ("ccf", "Perform common-cause failure analysis")
+      ("gate-probabilities", "Report gate probabilities in output")
       ("sil", "Compute the Safety Integrity Level metrics")
       ("rare-event", "Use the rare event approximation")
       ("mcub", "Use the MCUB approximation")
@@ -223,6 +224,7 @@ void ConstructSettings(const po::variables_map& vm,
   settings->importance_analysis(vm.count("importance"));
   settings->uncertainty_analysis(vm.count("uncertainty"));
   settings->ccf_analysis(vm.count("ccf"));
+  settings->gate_probabilities(vm.count("gate-probabilities"));
   SET("seed", int, seed);
   SET("limit-order", int, limit_order);
   SET("cut-off", double, cut_off);

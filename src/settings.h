@@ -287,6 +287,19 @@ class Settings {
     return *this;
   }
 
+  /// @returns true if gate probabilities are to be reported.
+  bool gate_probabilities() const { return gate_probabilities_; }
+
+  /// Sets the flag for reporting gate probabilities.
+  ///
+  /// @param[in] flag  True or false for turning on or off the reporting.
+  ///
+  /// @returns Reference to this object.
+  Settings& gate_probabilities(bool flag) {
+    gate_probabilities_ = flag;
+    return *this;
+  }
+
 #ifndef NDEBUG
   bool preprocessor = false;  ///< Stop analysis after preprocessor.
   bool print = false;  ///< Print analysis results in a terminal friendly way.
@@ -298,6 +311,7 @@ class Settings {
   bool importance_analysis_ = false;  ///< A flag for importance analysis.
   bool uncertainty_analysis_ = false;  ///< A flag for uncertainty analysis.
   bool ccf_analysis_ = false;  ///< A flag for common-cause analysis.
+  bool gate_probabilities_ = false;  ///< A flag for gate probability reporting.
   bool prime_implicants_ = false;  ///< Calculation of prime implicants.
   /// Qualitative analysis algorithm.
   Algorithm algorithm_ = Algorithm::kBdd;

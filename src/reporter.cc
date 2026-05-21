@@ -372,12 +372,54 @@ void Reporter::ReportResults(const core::RiskAnalysis::EtaResult& eta_result,
   }
 }
 
-void Reporter::ReportResults(const core::RiskAnalysis::Result::Id& /*id*/,
-                             const core::FaultTreeAnalysis& /*fta*/,
-                             const core::ProbabilityAnalysis* /*prob_analysis*/,
-                             xml::StreamElement* /*results*/) {
-  // NOTE: sum-of-products (cut sets) reporting is disabled per user request.
-  // Only BDD node probabilities and other quantitative results are reported.
+void Reporter::ReportResults(const core::RiskAnalysis::Result::Id& id,
+                             const core::FaultTreeAnalysis& fta,
+                             const core::ProbabilityAnalysis* prob_analysis,
+                             xml::StreamElement* results) {
+  TIMER(DEBUG2, "Reporting products");
+  xml::StreamElement sum_of_products = results->AddChild("sum-of-products");
+  scram::PutId(id, &sum_of_products);
+
+  std::string warning = fta.warnings();
+  if (prob_analysis && prob_analysis->warnings().empty() == false)
+    warning += (warning.empty() ? "" : "; ") + prob_analysis->warnings();
+  if (!warning.empty())
+    sum_of_products.SetAttribute("warning", warning);
+
+  sum_of_products
+      .SetAttribute("basic-events", fta.products().product_events().size())
+      .SetAttribute("products", fta.products().size());
+
+  if (prob_analysis)
+    sum_of_products.SetAttribute("probability", prob_analysis->p_total());
+
+  if (fta.products().empty() == false) {
+    sum_of_products.SetAttribute(
+        "distribution",
+        boost::join(fta.products().distribution() |
+                        boost::adaptors::transformed(
+                            [](int number) { return std::to_string(number); }),
+                    " "));
+  }
+
+  double sum = 0;  // Sum of probabilities for contribution calculations.
+  if (prob_analysis) {
+    for (const core::Product& product_set : fta.products())
+      sum += product_set.p();
+  }
+  for (const core::Product& product_set : fta.products()) {
+    xml::StreamElement product = sum_of_products.AddChild("product");
+    product.SetAttribute("order", product_set.order());
+    if (prob_analysis) {
+      double prob = product_set.p();
+      product.SetAttribute("probability", prob);
+      if (sum != 0)
+        product.SetAttribute("contribution", prob / sum);
+    }
+    for (const core::Literal& literal : product_set) {
+      ReportLiteral(literal, &product);
+    }
+  }
 }
 
 void Reporter::ReportResults(const core::RiskAnalysis::Result::Id& id,
@@ -421,14 +463,16 @@ void Reporter::ReportResults(const core::RiskAnalysis::Result::Id& id,
     report_sil_fractions(prob_analysis.sil().pfh_fractions);
   }
 
-  if (const auto* gate_probs = prob_analysis.gate_probabilities()) {
-    if (!gate_probs->empty()) {
-      xml::StreamElement gate_probs_elem = results->AddChild("gate-probabilities");
-      scram::PutId(id, &gate_probs_elem);
-      for (const auto& entry : *gate_probs) {
-        gate_probs_elem.AddChild("gate")
-            .SetAttribute("name", entry.first)
-            .SetAttribute("probability", entry.second);
+  if (prob_analysis.settings().gate_probabilities()) {
+    if (const auto* gate_probs = prob_analysis.gate_probabilities()) {
+      if (!gate_probs->empty()) {
+        xml::StreamElement gate_probs_elem = results->AddChild("gate-probabilities");
+        scram::PutId(id, &gate_probs_elem);
+        for (const auto& entry : *gate_probs) {
+          gate_probs_elem.AddChild("gate")
+              .SetAttribute("name", entry.first)
+              .SetAttribute("probability", entry.second);
+        }
       }
     }
   }
